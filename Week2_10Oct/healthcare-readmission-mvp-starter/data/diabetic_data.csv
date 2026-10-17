@@ -1,0 +1,13 @@
+Field,Purpose
+encounter_id,Unique encounter identifier
+patient_nbr,Patient identifier
+age,Age group or age value as supplied
+time_in_hospital,Length of stay
+number_inpatient,Prior inpatient utilization
+number_emergency,Prior emergency utilization
+number_outpatient,Prior outpatient utilization
+num_medications,Medication count
+num_lab_procedures,Laboratory procedure count
+discharge_disposition_id,Discharge disposition code
+admission_type_id,Admission type code
+readmitted,Historical outcome, reserved for evaluation
