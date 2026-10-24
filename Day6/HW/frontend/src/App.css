@@ -1,0 +1,292 @@
+body {
+  margin: 0;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 24px 16px;
+  box-sizing: border-box;
+  background-color: #f5f7fa;
+  font-family: Arial, sans-serif;
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.tabs button {
+  padding: 8px 16px;
+  border: 1px solid #aaa;
+  background-color: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.tabs button.active {
+  background-color: #b6d8f5;
+  border-color: #333;
+  font-weight: bold;
+}
+
+.card {
+  max-width: 340px;
+  border: 1px solid #333;
+  background-color: white;
+  margin: 0 auto;
+}
+
+.status-card {
+  max-width: 520px;
+}
+
+.card-header {
+  background-color: #b6d8f5;
+  border-bottom: 1px solid #333;
+  padding: 10px;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+form {
+  padding: 12px 22px;
+}
+
+form h3 {
+  color: #28629a;
+  font-size: 15px;
+  font-weight: normal;
+  margin-bottom: 25px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 14px;
+}
+
+.form-group label {
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: #222;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 190px;
+  height: 27px;
+  padding: 4px;
+  border: 1px solid #aaa;
+  border-radius: 0;
+  box-sizing: border-box;
+  background-color: white;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.form-group .short-select {
+  width: 110px;
+}
+
+.form-group input[readonly] {
+  background-color: #f0f0f0;
+  color: #555;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: 1px solid #3478b8;
+}
+
+/* Status tracking: two fields per row like the wireframe, stacked on narrow screens */
+.status-form {
+  border: 1px solid #ccc;
+  margin: 8px 16px 16px;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 16px;
+}
+
+.status-form .form-group textarea {
+  width: 100%;
+  height: auto;
+  resize: vertical;
+}
+
+.button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.button-container button {
+  min-width: 92px;
+  height: 34px;
+  border: 1px solid #aaa;
+  background-color: white;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 8px;
+}
+
+.button-container button:hover:not(:disabled) {
+  background-color: #eaf3fc;
+}
+
+.button-container button:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.arrow {
+  font-size: 18px;
+}
+
+.error {
+  color: #b00020;
+  font-size: 12px;
+  margin: 0;
+}
+
+.error.padded {
+  padding: 0 12px 12px;
+}
+
+.success {
+  color: #1b7a35;
+  font-size: 12px;
+  margin: 0;
+}
+
+.empty,
+.hint {
+  color: #555;
+  font-size: 13px;
+  padding: 0 12px;
+}
+
+.empty {
+  padding: 12px;
+  margin: 0;
+}
+
+.table-card {
+  max-width: 900px;
+  margin: 30px auto 0;
+  border: 1px solid #333;
+  background-color: white;
+  overflow-x: auto;
+}
+
+.table-card.wide {
+  margin-top: 0;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.data-table th,
+.data-table td {
+  border-bottom: 1px solid #ddd;
+  padding: 8px 10px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.data-table th {
+  background-color: #eaf3fc;
+  color: #28629a;
+  font-weight: bold;
+}
+
+.data-table tbody tr:hover {
+  background-color: #f5f9fd;
+}
+
+/* Encounter Id links */
+button.link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #28629a;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+}
+
+button.link.back {
+  margin: 10px 16px 0;
+  font-size: 13px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  border: 1px solid transparent;
+}
+
+.risk-low { background-color: #e8f6ec; color: #1b7a35; }
+.risk-medium { background-color: #fff4e0; color: #8a5300; }
+.risk-high { background-color: #fde8ea; color: #b00020; }
+
+.status-not-started { background-color: #f0f0f0; color: #444; }
+.status-in-progress { background-color: #eaf3fc; color: #28629a; }
+.status-completed { background-color: #e8f6ec; color: #1b7a35; }
+.status-cancelled { background-color: #f0f0f0; color: #777; text-decoration: line-through; }
+
+/* Status history ("List the update here") */
+.history {
+  border: 1px solid #ccc;
+  margin: 0 16px 16px;
+}
+
+.history ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.history li {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eee;
+  font-size: 13px;
+}
+
+.history li:last-child {
+  border-bottom: none;
+}
+
+.history-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.muted {
+  color: #666;
+}
+
+.right {
+  margin-left: auto;
+}
+
+.history-notes {
+  margin: 6px 0 0;
+  color: #222;
+}
