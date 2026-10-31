@@ -1,0 +1,713 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employee Performance Review API",
+    "description": "Manager-first performance reviews for every sprint / review period.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Health",
+        "operationId": "health_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/employees": {
+      "get": {
+        "tags": [
+          "Employees"
+        ],
+        "summary": "List all employees",
+        "description": "All employees, sorted by name. Feeds the employee dropdowns.",
+        "operationId": "list_employees_api_employees_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EmployeeOut"
+                  },
+                  "type": "array",
+                  "title": "Response List Employees Api Employees Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/employees/{employee_id}": {
+      "get": {
+        "tags": [
+          "Employees"
+        ],
+        "summary": "Get one employee",
+        "operationId": "get_employee_api_employees__employee_id__get",
+        "parameters": [
+          {
+            "name": "employee_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Employee Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmployeeOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/review-periods": {
+      "get": {
+        "tags": [
+          "Review Periods"
+        ],
+        "summary": "List review periods",
+        "description": "Master data for the review period dropdown, newest first.",
+        "operationId": "list_review_periods_api_review_periods_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReviewPeriodOut"
+                  },
+                  "type": "array",
+                  "title": "Response List Review Periods Api Review Periods Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reviews": {
+      "get": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "List / search reviews",
+        "description": "Reviews for the selected filters, newest first, with pagination.\n\n`average_rating` in the response is the mean over **all** matching reviews,\ne.g. an employee's overall average when filtering by `employee_id`.",
+        "operationId": "list_reviews_api_reviews_get",
+        "parameters": [
+          {
+            "name": "employee_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only this employee's reviews (all periods)",
+              "title": "Employee Id"
+            },
+            "description": "Only this employee's reviews (all periods)"
+          },
+          {
+            "name": "review_period_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "exclusiveMinimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only reviews in this period",
+              "title": "Review Period Id"
+            },
+            "description": "Only reviews in this period"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "Rows per page: 5 or 10",
+              "enum": [
+                5,
+                10
+              ],
+              "default": 10,
+              "title": "Page Size"
+            },
+            "description": "Rows per page: 5 or 10"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Submit a review",
+        "operationId": "create_review_api_reviews_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewCreated"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Employee already reviewed for this period",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error, unknown/inactive employee, unknown/closed period"
+          }
+        }
+      }
+    },
+    "/api/reviews/{review_id}": {
+      "get": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Get review details",
+        "operationId": "get_review_api_reviews__review_id__get",
+        "parameters": [
+          {
+            "name": "review_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Review Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "EmployeeOut": {
+        "properties": {
+          "employee_id": {
+            "type": "string",
+            "title": "Employee Id",
+            "examples": [
+              "EMP101"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "John Smith"
+            ]
+          },
+          "department": {
+            "type": "string",
+            "title": "Department",
+            "examples": [
+              "Engineering"
+            ]
+          },
+          "designation": {
+            "type": "string",
+            "title": "Designation",
+            "examples": [
+              "Senior Developer"
+            ]
+          },
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "examples": [
+              "john.smith@example.com"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "examples": [
+              "Active"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "employee_id",
+          "name",
+          "department",
+          "designation",
+          "email",
+          "status"
+        ],
+        "title": "EmployeeOut"
+      },
+      "ErrorOut": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "ErrorOut"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ReviewCreate": {
+        "properties": {
+          "employee_id": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 1,
+            "title": "Employee Id",
+            "examples": [
+              "EMP102"
+            ]
+          },
+          "review_period_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Review Period Id",
+            "examples": [
+              3
+            ]
+          },
+          "quality_rating": {
+            "type": "integer",
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Quality Rating",
+            "description": "Rating from 1 (lowest) to 5 (highest)"
+          },
+          "delivery_rating": {
+            "type": "integer",
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Delivery Rating",
+            "description": "Rating from 1 (lowest) to 5 (highest)"
+          },
+          "teamwork_rating": {
+            "type": "integer",
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Teamwork Rating",
+            "description": "Rating from 1 (lowest) to 5 (highest)"
+          },
+          "comments": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Comments",
+            "examples": [
+              "Delivered all sprint stories on time."
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "employee_id",
+          "review_period_id",
+          "quality_rating",
+          "delivery_rating",
+          "teamwork_rating",
+          "comments"
+        ],
+        "title": "ReviewCreate"
+      },
+      "ReviewCreated": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "examples": [
+              "Review submitted successfully"
+            ]
+          },
+          "review": {
+            "$ref": "#/components/schemas/ReviewOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "review"
+        ],
+        "title": "ReviewCreated"
+      },
+      "ReviewOut": {
+        "properties": {
+          "review_id": {
+            "type": "integer",
+            "title": "Review Id"
+          },
+          "employee_id": {
+            "type": "string",
+            "title": "Employee Id"
+          },
+          "employee_name": {
+            "type": "string",
+            "title": "Employee Name"
+          },
+          "department": {
+            "type": "string",
+            "title": "Department"
+          },
+          "designation": {
+            "type": "string",
+            "title": "Designation"
+          },
+          "review_period_id": {
+            "type": "integer",
+            "title": "Review Period Id"
+          },
+          "review_period_name": {
+            "type": "string",
+            "title": "Review Period Name"
+          },
+          "period_type": {
+            "type": "string",
+            "title": "Period Type"
+          },
+          "quality_rating": {
+            "type": "integer",
+            "title": "Quality Rating"
+          },
+          "delivery_rating": {
+            "type": "integer",
+            "title": "Delivery Rating"
+          },
+          "teamwork_rating": {
+            "type": "integer",
+            "title": "Teamwork Rating"
+          },
+          "average_rating": {
+            "type": "number",
+            "title": "Average Rating",
+            "description": "(quality + delivery + teamwork) / 3, 2 decimals"
+          },
+          "comments": {
+            "type": "string",
+            "title": "Comments"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "review_id",
+          "employee_id",
+          "employee_name",
+          "department",
+          "designation",
+          "review_period_id",
+          "review_period_name",
+          "period_type",
+          "quality_rating",
+          "delivery_rating",
+          "teamwork_rating",
+          "average_rating",
+          "comments",
+          "created_at"
+        ],
+        "title": "ReviewOut"
+      },
+      "ReviewPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ReviewOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "Total reviews matching the filters"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size"
+          },
+          "total_pages": {
+            "type": "integer",
+            "title": "Total Pages"
+          },
+          "average_rating": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Rating",
+            "description": "Mean of average_rating over ALL reviews matching the filters (not just this page)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "page_size",
+          "total_pages",
+          "average_rating"
+        ],
+        "title": "ReviewPage"
+      },
+      "ReviewPeriodOut": {
+        "properties": {
+          "review_period_id": {
+            "type": "integer",
+            "title": "Review Period Id",
+            "examples": [
+              2
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "examples": [
+              "H1 2026"
+            ]
+          },
+          "period_type": {
+            "type": "string",
+            "title": "Period Type",
+            "examples": [
+              "Half-Yearly"
+            ]
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "title": "End Date"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "examples": [
+              "Open"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "review_period_id",
+          "name",
+          "period_type",
+          "start_date",
+          "end_date",
+          "status"
+        ],
+        "title": "ReviewPeriodOut"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

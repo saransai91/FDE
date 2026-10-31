@@ -1,0 +1,27 @@
+/* Color sheet. Swap these tokens for the official color sheet; nothing else needs to change. */
+:root {
+  --color-primary: #2f4bd8;
+  --color-primary-hover: #2339b0;
+  --color-primary-soft: #e8ecfd;
+
+  --color-sidebar: #18213d;
+  --color-sidebar-text: #c9d0e6;
+  --color-sidebar-active: #2f4bd8;
+
+  --color-bg: #f4f6fb;
+  --color-surface: #ffffff;
+  --color-border: #dfe3ee;
+  --color-text: #1b2236;
+  --color-muted: #66708a;
+
+  --color-success: #127a4a;
+  --color-success-bg: #e5f5ed;
+  --color-warning: #9a5b00;
+  --color-warning-bg: #fdf1dc;
+  --color-danger: #b42318;
+  --color-danger-bg: #fdecea;
+
+  --radius: 10px;
+  --shadow: 0 1px 2px rgb(16 24 40 / 6%), 0 1px 3px rgb(16 24 40 / 8%);
+  --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}

@@ -1,0 +1,281 @@
+openapi: 3.0.3
+info:
+  title: Employee Performance Review API
+  version: 1.0.0
+  description: |
+    API-first contract for the Employee Performance Review app.
+    Phase 1 (mandatory): employees, review-periods, list and submit reviews.
+    Phase 2 (optional): review details, edit, delete, department summary.
+servers:
+  - url: http://localhost:8000/api
+tags:
+  - name: Employees
+  - name: Review Periods
+  - name: Reviews
+
+paths:
+  /employees:
+    get:
+      tags: [Employees]
+      summary: Get list of employees
+      operationId: listEmployees
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema: { $ref: '#/components/schemas/EmployeeStatus' }
+      responses:
+        '200':
+          description: Employees ordered by employee_id
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Employee' }
+
+  /review-periods:
+    get:
+      tags: [Review Periods]
+      summary: Get list of review periods
+      operationId: listReviewPeriods
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema: { $ref: '#/components/schemas/PeriodStatus' }
+      responses:
+        '200':
+          description: Periods ordered by start_date descending
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ReviewPeriod' }
+
+  /reviews:
+    get:
+      tags: [Reviews]
+      summary: Get reviews (optional filters, paginated)
+      operationId: listReviews
+      parameters:
+        - { name: period_id,   in: query, required: false, schema: { type: integer, minimum: 1 } }
+        - { name: employee_id, in: query, required: false, schema: { type: integer, minimum: 1 } }
+        - { name: page,        in: query, required: false, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: page_size,   in: query, required: false, schema: { type: integer, minimum: 1, maximum: 100, default: 5 } }
+      responses:
+        '200':
+          description: Reviews ordered newest first
+          headers:
+            X-Total-Count:
+              description: Total number of reviews that match the filters (all pages)
+              schema: { type: integer }
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Review' }
+              example:
+                - id: 1
+                  employee_id: 1
+                  employee_code: EMP101
+                  employee_name: John Smith
+                  period_id: 6
+                  period_name: H1 2026
+                  quality_rating: 4
+                  delivery_rating: 5
+                  teamwork_rating: 4
+                  average_rating: 4.33
+                  comments: Strong performer with great teamwork.
+                  created_at: '2026-01-15T10:30:00'
+        '422': { $ref: '#/components/responses/ValidationError' }
+    post:
+      tags: [Reviews]
+      summary: Submit a new review
+      operationId: createReview
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReviewCreate' }
+            example:
+              employee_id: 1
+              period_id: 6
+              quality_rating: 4
+              delivery_rating: 5
+              teamwork_rating: 4
+              comments: Strong performer with great teamwork.
+      responses:
+        '201':
+          description: Review created; average_rating calculated by server
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Review' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /reviews/{review_id}:
+    parameters:
+      - { name: review_id, in: path, required: true, schema: { type: integer } }
+    get:
+      tags: [Reviews]
+      summary: Get review details (optional, phase 2)
+      operationId: getReview
+      responses:
+        '200':
+          description: Review
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Review' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Reviews]
+      summary: Edit a review (optional, phase 2)
+      operationId: updateReview
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReviewUpdate' }
+      responses:
+        '200':
+          description: Updated review
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Review' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    delete:
+      tags: [Reviews]
+      summary: Delete a review (optional, phase 2)
+      operationId: deleteReview
+      responses:
+        '204': { description: Deleted }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /reviews/summary/departments:
+    get:
+      tags: [Reviews]
+      summary: Average rating by department (optional, phase 2)
+      operationId: departmentSummary
+      parameters:
+        - { name: period_id, in: query, required: false, schema: { type: integer } }
+      responses:
+        '200':
+          description: One row per department
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/DepartmentSummary' }
+
+components:
+  schemas:
+    EmployeeStatus:
+      type: string
+      enum: [Active, Inactive]
+    PeriodStatus:
+      type: string
+      enum: [Open, Closed]
+    Rating:
+      type: integer
+      minimum: 1
+      maximum: 5
+
+    Employee:
+      type: object
+      required: [id, employee_id, name, department, email, status]
+      properties:
+        id:          { type: integer, example: 1 }
+        employee_id: { type: string, maxLength: 20, example: EMP101 }
+        name:        { type: string, maxLength: 100, example: John Smith }
+        department:  { type: string, maxLength: 100, example: Engineering }
+        email:       { type: string, format: email, example: john.smith@testleaf.com }
+        status:      { $ref: '#/components/schemas/EmployeeStatus' }
+
+    ReviewPeriod:
+      type: object
+      required: [id, name, start_date, end_date, status]
+      properties:
+        id:         { type: integer, example: 6 }
+        name:       { type: string, maxLength: 50, example: H1 2026 }
+        start_date: { type: string, format: date, example: '2026-01-01' }
+        end_date:   { type: string, format: date, example: '2026-06-30' }
+        status:     { $ref: '#/components/schemas/PeriodStatus' }
+
+    ReviewCreate:
+      type: object
+      required: [employee_id, period_id, quality_rating, delivery_rating, teamwork_rating, comments]
+      additionalProperties: false
+      properties:
+        employee_id:     { type: integer, minimum: 1, description: employees.id }
+        period_id:       { type: integer, minimum: 1, description: review_periods.id }
+        quality_rating:  { $ref: '#/components/schemas/Rating' }
+        delivery_rating: { $ref: '#/components/schemas/Rating' }
+        teamwork_rating: { $ref: '#/components/schemas/Rating' }
+        comments:        { type: string, minLength: 1, maxLength: 2000, description: Must not be blank }
+
+    ReviewUpdate:
+      type: object
+      required: [quality_rating, delivery_rating, teamwork_rating, comments]
+      additionalProperties: false
+      properties:
+        quality_rating:  { $ref: '#/components/schemas/Rating' }
+        delivery_rating: { $ref: '#/components/schemas/Rating' }
+        teamwork_rating: { $ref: '#/components/schemas/Rating' }
+        comments:        { type: string, minLength: 1, maxLength: 2000 }
+
+    Review:
+      type: object
+      required: [id, employee_id, employee_code, employee_name, period_id, period_name,
+                 quality_rating, delivery_rating, teamwork_rating, average_rating, comments, created_at]
+      properties:
+        id:              { type: integer }
+        employee_id:     { type: integer }
+        employee_code:   { type: string, example: EMP101 }
+        employee_name:   { type: string, example: John Smith }
+        period_id:       { type: integer }
+        period_name:     { type: string, example: H1 2026 }
+        quality_rating:  { $ref: '#/components/schemas/Rating' }
+        delivery_rating: { $ref: '#/components/schemas/Rating' }
+        teamwork_rating: { $ref: '#/components/schemas/Rating' }
+        average_rating:  { type: number, format: float, example: 4.33 }
+        comments:        { type: string }
+        created_at:      { type: string, format: date-time }
+
+    DepartmentSummary:
+      type: object
+      properties:
+        department:     { type: string }
+        review_count:   { type: integer }
+        average_rating: { type: number, format: float }
+
+    Error:
+      type: object
+      required: [detail]
+      properties:
+        detail:
+          description: Message string, or a list of field errors for 422 validation
+          oneOf:
+            - type: string
+            - type: array
+              items: { type: object }
+
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { detail: Review 99 not found }
+    Conflict:
+      description: Duplicate review for employee + period (BR-3)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { detail: A review already exists for this employee and period }
+    ValidationError:
+      description: Invalid input or business rule violation (closed period, inactive employee, unknown ids)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { detail: Review period H1 2025 is Closed }
